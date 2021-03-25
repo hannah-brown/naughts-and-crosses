@@ -1,51 +1,60 @@
 public class Controller {
     private final Output out;
-    private final Input in;
+    private final MoveVerifier move;
 
-    BoardState board = new BoardState();
-    GameState game = new GameState(1);
-    VictoryChecker victory = new VictoryChecker();
+    private final BoardState board;
+    private final GameState game;
+    private final VictoryChecker victory;
 
-
-    Controller(Input in, Output out) {
-        this.in = in;
+    Controller(MoveVerifier move, Output out, BoardState board, GameState game, VictoryChecker victory) {
         this.out = out;
+        this.move = move;
+        this.board = board;
+        this.game = game;
+        this.victory = victory;
     }
 
     public void run(){
         printBoard();
-        printPlayerMovePrompt();
-        if (board.getBoard().containsValue("")) {
-            newMove();
-            if (!victory.check(board.getBoardArray())) {
+        if(board.isFull()) {
+            printDrawMessage();
+        } else {
+            printPlayerMovePrompt();
+            updateBoardWithMove();
+            if(isWon()) {
+                printWinningPlayerMessage();
+            } else {
                 game.switchPlayer();
                 run();
-            } else {
-                printBoard();
-                printWinningPlayerMessage();
-                out.print("Game Over");
-                //todo add draw output
             }
         }
 
     }
 
-    //Could make private?
-    public void newMove() {
-        //todo get rid of board from move verifier?
-        MoveVerifier move = new MoveVerifier(in, board);//should this live here?
-        board.updateBoard(move.getValidMove(), game.getPlayer());
+    private void updateBoardWithMove() {
+        board.updateBoard(move.getValidMove(board.getBoardMap()), game.getPlayer());
     }
 
     private void printBoard() {
-        out.printBoard(board.getBoard());
+        out.printBoard(board.getBoardMap());
     }
 
     private void printPlayerMovePrompt(){
         out.printPlayer(game.getPlayer());
     }
 
-    private void printWinningPlayerMessage(){
+    private void printWinningPlayerMessage() {
+        printBoard();
         out.printWinningPlayer(game.getPlayer());
+        out.print("Game Over");
+    }
+
+    private void printDrawMessage() {
+        out.printDraw();
+        out.print("Game Over");
+    }
+
+    private boolean isWon() {
+        return victory.check(board.getBoardArray());
     }
 }

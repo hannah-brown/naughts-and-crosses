@@ -25,10 +25,10 @@ public class VictoryChecker {
     }
 
     private boolean checkDiagonals(String[][] board) {
-        return checkDiagonal(board, 0, 1, 2) || checkDiagonal(board, 2, 1, 0);
+        return checkDiagonal(board, 0, 2) || checkDiagonal(board, 2, 0);
     }
 
-    private boolean checkDiagonal(String[][] board, int i, int i2, int i3) {
-        return !board[0][i].isEmpty() && board[0][i].equals(board[1][i2]) && board[0][i].equals(board[2][i3]);
+    private boolean checkDiagonal(String[][] board, int i, int i3) {
+        return !board[0][i].isEmpty() && board[0][i].equals(board[1][1]) && board[0][i].equals(board[2][i3]);
     }
 }

@@ -1,22 +1,22 @@
+import java.util.Map;
+
 public class MoveVerifier {
 
     private final Input in;
-    private final BoardState board;
 
-    public MoveVerifier(Input in, BoardState board){
+    public MoveVerifier(Input in){
         this.in = in;
-        this.board = board;
     }
 
-    public String getValidMove(){
-        String move = in.readString("Please Enter Move").toUpperCase();
+    public String getValidMove(Map<String, String> board){
+        String move = in.readString("Please Enter Move").toUpperCase(); //a2 = ""
 
-        if(board.getBoard().get(move) == null){
-            return getValidMove();
+        if(board.get(move) == null){
+            return getValidMove(board);
         }
-        if(!board.getBoard().get(move).equals("")){
+        if(!board.get(move).equals("")){
             System.out.println("Move has been taken");
-            return  getValidMove();
+            return  getValidMove(board);
         }
         return move;
     }

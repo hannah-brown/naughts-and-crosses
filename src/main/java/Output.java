@@ -22,4 +22,8 @@ public class Output {
     public void printWinningPlayer(int player) {
         System.out.println("Player " + player + " wins");
     }
+
+    public void printDraw() {
+        print("Draw");
+    }
 }

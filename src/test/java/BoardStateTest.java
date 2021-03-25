@@ -3,8 +3,9 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class BoardStateTest {
 
@@ -18,7 +19,7 @@ public class BoardStateTest {
         }};
 
         board.updateBoard("A1", 1);
-        assertEquals(board.getBoard(), expectedBoard);
+        assertEquals(board.getBoardMap(), expectedBoard);
     }
 
     @Test
@@ -31,7 +32,7 @@ public class BoardStateTest {
         }};
 
         board.updateBoard("B2", 1);
-        assertEquals(board.getBoard(), expectedBoard);
+        assertEquals(board.getBoardMap(), expectedBoard);
     }
 
     @Test
@@ -44,7 +45,7 @@ public class BoardStateTest {
         }};
 
         board.updateBoard("B2", 2);
-        assertEquals(board.getBoard(), expectedBoard);
+        assertEquals(board.getBoardMap(), expectedBoard);
     }
 
     @Test
@@ -58,7 +59,7 @@ public class BoardStateTest {
 
         board.updateBoard("A1", 1);
         board.updateBoard("B2", 2);
-        assertEquals(board.getBoard(), expectedBoard);
+        assertEquals(board.getBoardMap(), expectedBoard);
     }
 
     @Test
@@ -71,5 +72,43 @@ public class BoardStateTest {
         String[][] expectedBoardArray = {{"X", "", ""}, {"", "O", ""}, {"", "", "X"}};
 
         assertThat(board.getBoardArray()).isEqualTo(expectedBoardArray);
+    }
+
+    @Test
+    public void shouldReturnTrueWhenBoardIsFull() {
+        BoardState board = new BoardState();
+        board.updateBoard("A1", 1);
+        board.updateBoard("A2", 1);
+        board.updateBoard("A3", 1);
+        board.updateBoard("B1", 1);
+        board.updateBoard("B2", 1);
+        board.updateBoard("B3", 1);
+        board.updateBoard("C1", 1);
+        board.updateBoard("C2", 1);
+        board.updateBoard("C3", 1);
+
+        assertThat(board.isFull()).isTrue();
+    }
+
+    @Test
+    public void shouldReturnFalseWhenBoardIsNotFull() {
+        BoardState board = new BoardState();
+        board.updateBoard("A1", 1);
+        board.updateBoard("A2", 1);
+        board.updateBoard("A3", 1);
+        board.updateBoard("B1", 1);
+        board.updateBoard("B2", 1);
+        board.updateBoard("B3", 1);
+        board.updateBoard("C1", 1);
+        board.updateBoard("C2", 1);
+
+        assertThat(board.isFull()).isFalse();
+    }
+
+    @Test
+    public void shouldReturnFalseWhenBoardIsEmpty() {
+        BoardState board = new BoardState();
+
+        assertThat(board.isFull()).isFalse();
     }
 }

@@ -3,11 +3,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -16,52 +11,79 @@ public class ControllerTest {
     private Output out;
 
     @Mock
-    private Input in;
+    private MoveVerifier move;
+
+    @Mock
+    private BoardState board;
+
+    @Mock
+    private GameState game;
+
+    @Mock
+    private VictoryChecker victory;
 
     @Test
-    public void shouldPrintUpdatedBoardAndPlayer() {
-        Controller controller = new Controller(in, out);
-        when(in.readString(anyString())).thenReturn("A1");
-        Map<String, String> expectedBoard = new HashMap<>(){{
-            put("A1", "X");put("A2", "");put("A3", "");
-            put("B1", "");put("B2", "");put("B3", "");
-            put("C1", "");put("C2", "");put("C3", "");
-        }};
-
-
-        controller.newMove();
-
-        verify(in, times(1)).readString("Please Enter Move");
-        assertThat(controller.board.getBoard()).containsExactlyEntriesOf(expectedBoard);
-        assertThat(controller.game.getPlayer()).isEqualTo(1);
-    }
-
-    @Test
-    public void shouldRecallRunUntilThreeInARow() {
-        Controller controller = new Controller(in, out);
-        when(in.readString(anyString()))
-                .thenReturn("A1")
-                .thenReturn("A2")
-                .thenReturn("A3")
-                .thenReturn("B1")
-                .thenReturn("B2")
-                .thenReturn("B3")
-                .thenReturn("C1");
-        Map<String, String> expectedBoard = new HashMap<>(){{
-            put("A1", "X");put("A2", "O");put("A3", "X");
-            put("B1", "O");put("B2", "X");put("B3", "O");
-            put("C1", "X");put("C2", "");put("C3", "");
-        }};
+    public void shouldPrintDrawWhenBoardIsFull(){
+        Controller controller = new Controller(move, out, board, game, victory);
+        when(board.isFull()).thenReturn(true);
 
         controller.run();
 
-        verify(out, times(8)).printBoard(anyMap());
-        verify(out, times(7)).printPlayer(anyInt());
+        verify(out, times(1)).printBoard(anyMap());
+        verify(out, times(1)).printDraw();
+        verify(out, times(1)).print("Game Over");
+    }
 
-        //todo test new Move is called right number of times
+    @Test
+    public void shouldPrintWinningPlayer(){
+        Controller controller = new Controller(move, out, board, game, victory);
+        when(board.isFull()).thenReturn(false);
+        when(game.getPlayer()).thenReturn(1);
+        when(move.getValidMove(anyMap())).thenReturn("A1");
+        when(victory.check(any())).thenReturn(true);
 
-        assertThat(controller.board.getBoard()).containsExactlyEntriesOf(expectedBoard);
+
+        controller.run();
+
+        verify(out, times(2)).printBoard(anyMap());
+        verify(out, never()).printDraw();
         verify(out, times(1)).printWinningPlayer(1);
+        verify(board, times(1)).updateBoard("A1", 1);
+        verify(out, times(1)).print("Game Over");
+    }
+
+    @Test
+    public void shouldCallRunTwiceWhenLastMoveIsDraw(){
+        Controller controller = new Controller(move, out, board, game, victory);
+        when(board.isFull()).thenReturn(false).thenReturn(true);
+        when(game.getPlayer()).thenReturn(1);
+        when(move.getValidMove(anyMap())).thenReturn("A1");
+        when(victory.check(any())).thenReturn(false);
+
+        controller.run();
+
+        verify(out, times(2)).printBoard(anyMap());
+        verify(out, times(1)).printDraw();
+        verify(out, never()).printWinningPlayer(anyInt());
+        verify(board, times(1)).updateBoard("A1", 1);
+        verify(out, times(1)).print("Game Over");
+    }
+
+    @Test
+    public void shouldCallRunWhenMoveDidNotWin(){
+        Controller controller = new Controller(move, out, board, game, victory);
+        when(board.isFull()).thenReturn(false);
+        when(game.getPlayer()).thenReturn(1);
+        when(move.getValidMove(anyMap())).thenReturn("A1").thenReturn("A2");
+        when(victory.check(any())).thenReturn(false).thenReturn(true);
+
+        controller.run();
+
+        verify(out, times(3)).printBoard(anyMap());
+        verify(out, never()).printDraw();
+        verify(out, times(1)).printWinningPlayer(1);
+        verify(board, times(1)).updateBoard("A1", 1);
+        verify(board, times(1)).updateBoard("A2", 1);
         verify(out, times(1)).print("Game Over");
     }
 }
